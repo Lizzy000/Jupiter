@@ -15,9 +15,6 @@ import entity.Item.ItemBuilder;
 import external.TicketMasterAPI;
 
 
-//这个类相当于spring mvc里的DAO层。直接对数据库进行CRUD操作。
-//类中的method，基本也遵循CRUD原则
-//这里省略了controller和service层，直接通过servlet对话DAO
 public class MySQLConnection implements DBConnection {
 
 	private Connection conn;
@@ -44,7 +41,6 @@ public class MySQLConnection implements DBConnection {
 
 	}
 
-	//注意这里接收的是item id的list，就算只收藏一个item，也要把item放进list里传进来。
 	@Override
 	public void setFavoriteItems(String userId, List<String> itemIds) {
 
@@ -87,13 +83,7 @@ public class MySQLConnection implements DBConnection {
 
 	}
 
-	//因为不能直接通过user id直接找到favorite items
-	//它们在两张不同的table上
-	//因此拆分成两个methods：
-	//1. 通过 userId 在history表上 获取 itemId
-	//2. 通过返回的itemId 在 item 的表里获得 item的相关信息
 	
-	//知道这里为什么返回的是set不是list？因为set又contains方法
 	@Override
 	public Set<String> getFavoriteItemIds(String userId) {
 		
@@ -130,8 +120,7 @@ public class MySQLConnection implements DBConnection {
 		
 		Set<Item> favoriteItems = new HashSet<>();
 		
-		//根据user id获得收藏列表中每个item的id，从数据库取出根据id 取出item（包含一个item的各种信息）
-		//然后把取出的item信息封装成对象。
+
 		Set<String> itemIds = getFavoriteItemIds(userId);
 		
 		try {

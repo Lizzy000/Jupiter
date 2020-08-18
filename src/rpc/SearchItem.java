@@ -44,15 +44,10 @@ public class SearchItem extends HttpServlet {
 		// Term can be empty or null.
 		String term = request.getParameter("term");
 
-		//连接DAO层，没有对数据库进行直接操作，而是先去ticketMaster查一波events，
-		//把返回的events进行save（INSERT）操作
-		//分别存到items和categories表里
+		
 		DBConnection conn = DBConnectionFactory.getConnection();
 		List<Item> items = conn.searchItems(lat, lon, term);
-		//对数据库进行SELECT操作，分别从history和items表里
-		//知道为什么getFavoriteItemId的返回结果是Set不是List么？
-		//就是为了下面favorite.contains()的操作。
-		//只有set才能用contains方法。
+		
 		Set<String> favorite = conn.getFavoriteItemIds(userId);
 		conn.close();
 

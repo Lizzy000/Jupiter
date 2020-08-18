@@ -17,24 +17,7 @@ import entity.Item;
 import entity.Item.ItemBuilder;
 
 
-/**
- * TicketMaster API 主要就干了一件事：
- * 1. 与TicketMaster建立http连接，
- * 2. 发起搜索请求，获得response
- * 3. 从response body里通过io流读取JSON，变成java对象JSON Array
- * 4. 通过调用小弟method把JSON Array变成内部货币List
- * 
- * 小弟：
- * List<Item> getItemList(JSONArray events)
- * 
- * 小弟的三个小小弟：
- * String getAddress(JSONObject event)
- * String getImageUrl(JSONObject event)
- * Set<String> getCategories(JSONObject event)
- * 
- * @author ringo
- *
- */
+
 public class TicketMasterAPI {
 	private static final String URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 	private static final String DEFAULT_KEYWORD = ""; // no restriction
@@ -69,7 +52,7 @@ public class TicketMasterAPI {
 	//    ...
 	//  }
 	
-	//小小弟一号
+	
 	private String getAddress(JSONObject event) throws JSONException {
 		if (!event.isNull("_embedded")) {
 			JSONObject embedded = event.getJSONObject("_embedded");
@@ -120,7 +103,7 @@ public class TicketMasterAPI {
 
 	// {"images": [{"url": "www.example.com/my_image.jpg"}, ...]}
 	
-	//小小弟二号
+	
 	private String getImageUrl(JSONObject event) throws JSONException {
 		if (!event.isNull("images")) {
 			JSONArray images = event.getJSONArray("images");
@@ -160,7 +143,6 @@ public class TicketMasterAPI {
 	}
 
 	// Convert JSONArray to a list of item objects.
-	//被主逻辑search method调用的小弟。小弟下面再调用三个小弟。就是楼上三个小小弟。
 	private List<Item> getItemList(JSONArray events) throws JSONException {
 		List<Item> itemList = new ArrayList<>();
 
@@ -202,10 +184,7 @@ public class TicketMasterAPI {
 	}
 
 	
-	//主逻辑大哥，先调用了楼上的小弟（getItemList），楼上的小弟再调用楼上上的三个小弟
-	//注意：这里为什么从TicketMaster拿到了JSON格式的数据还要转换成List？
-	//因为直接调用此search方法的是MySQLConnection，这列返回的数据是要save到数据库里的
-	//进入数据库的数据必须是string或者list<item>
+
 	public List<Item> search(double lat, double lon, String keyword) { // change return type from JSONArray to List<Item>
         if (keyword == null) {
         	keyword = DEFAULT_KEYWORD;
@@ -249,15 +228,11 @@ public class TicketMasterAPI {
 				return new ArrayList<>(); // modified
 			}
 			
-			//为什么我们拿到JSON Object不直接返回给servlet让它回复客户端？
-			//因为从ticketMaster得到的数据是生数据，需要把无用的部分剔除。
-			//obj里只有embedded下的events部分才是有效的数据。
-			//而events里也有许多脏数据需要清洗。但是这个清洗步骤太繁琐，于是我们交给getItemList等小弟处理。
+			
 			JSONObject embedded = obj.getJSONObject("_embedded");
 			JSONArray events = embedded.getJSONArray("events");
 			
-			//下面这句话，又误解成分。不是为了转换成List，而是为了清洗数据。
-			//把JSON Array转换成内部通行格式List。这里需要调用sibling methods
+			
 			return getItemList(events); //modified
 		} catch (Exception e) {
 			e.printStackTrace();
